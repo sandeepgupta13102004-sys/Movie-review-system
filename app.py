@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_cors import CORS
 from config import client
 from routes.movie_routes import movie_bp
@@ -9,14 +9,12 @@ CORS(app)
 
 @app.route('/', methods=['GET'])
 def home():
-    return{
-        "message": " Movie Review API is running successfully"
-    }, 200
+   return render_template('index.html'), 200
 
 app.register_blueprint(movie_bp, url_prefix='/api')
 app.register_blueprint(review_bp, url_prefix='/api')
 
-# @app.route(/health',methods=['GET'])
+@app.route('/health', methods=['GET'])
 def health():
     try:
         client.admin.command('ping')
@@ -29,5 +27,5 @@ def health():
         }, 500
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': 
     app.run(debug=True)
