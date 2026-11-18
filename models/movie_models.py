@@ -1,6 +1,6 @@
 from datetime import datetime
 from bson import ObjectId
-from config import movies_collection, reviews_collection
+from config import get_movies_collection, get_reviews_collection
 
 
 def serialize(document):
@@ -19,16 +19,19 @@ def serialize(document):
 
 # Movie Model.......
 def create_movie(movie_data):
+    movies_collection = get_movies_collection()
     result = movies_collection.insert_one(movie_data)
     return str(result.inserted_id)
 
 
 def get_all_movies():
+    movies_collection = get_movies_collection()
     movies = movies_collection.find().sort('title', 1)
     return [serialize(movie) for movie in movies]
 
 
 def get_movie_by_id(movie_id):
+    movies_collection = get_movies_collection()
     if not ObjectId.is_valid(movie_id):
         return None
 
@@ -39,6 +42,7 @@ def get_movie_by_id(movie_id):
 
 
 def update_movie(movie_id, movie_data):
+    movies_collection = get_movies_collection()
     if not ObjectId.is_valid(movie_id):
         return False
 
@@ -47,6 +51,8 @@ def update_movie(movie_id, movie_data):
 
 
 def delete_movie(movie_id):
+    movies_collection = get_movies_collection()
+    reviews_collection = get_reviews_collection()
     if not ObjectId.is_valid(movie_id):
         return False
 
@@ -60,6 +66,7 @@ def delete_movie(movie_id):
 
 # Review Models.....
 def create_review(movie_id, review_data):
+    reviews_collection = get_reviews_collection()
     if not ObjectId.is_valid(movie_id):
         return None
 
@@ -71,6 +78,7 @@ def create_review(movie_id, review_data):
 
 
 def get_review_by_movie(movie_id):
+    reviews_collection = get_reviews_collection()
     if not ObjectId.is_valid(movie_id):
         return []
 
@@ -79,6 +87,7 @@ def get_review_by_movie(movie_id):
 
 
 def get_review_by_id(review_id):
+    reviews_collection = get_reviews_collection()
     if not ObjectId.is_valid(review_id):
         return None
 
@@ -89,6 +98,7 @@ def get_review_by_id(review_id):
 
 
 def update_review(review_id, review_data):
+    reviews_collection = get_reviews_collection()
     if not ObjectId.is_valid(review_id):
         return False
 
@@ -97,6 +107,7 @@ def update_review(review_id, review_data):
 
 
 def delete_review(review_id):
+    reviews_collection = get_reviews_collection()
     if not ObjectId.is_valid(review_id):
         return False
 
@@ -106,6 +117,7 @@ def delete_review(review_id):
 
 # Comment Models.....
 def add_comment(review_id, comment_data):
+    reviews_collection = get_reviews_collection()
     if not ObjectId.is_valid(review_id) or not isinstance(comment_data, dict):
         return False
     result = reviews_collection.update_one({'_id': ObjectId(review_id)}, {'$push': {'comments': comment_data}})
@@ -113,6 +125,7 @@ def add_comment(review_id, comment_data):
 
 
 def delete_comment(review_id, comment_id):
+    reviews_collection = get_reviews_collection()
     if not ObjectId.is_valid(review_id):
         return False
     result = reviews_collection.update_one({'_id': ObjectId(review_id)}, {'$pull': {'comments': {'_id': comment_id}}})

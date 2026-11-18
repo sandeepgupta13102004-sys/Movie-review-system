@@ -1,6 +1,8 @@
 from datetime import datetime
+
 from bson import ObjectId
-from config import movies_collection, reviews_collection
+
+from config import get_movies_collection, get_reviews_collection
 
 
 def serialize_movie(movie):
@@ -19,6 +21,8 @@ def serialize_movie(movie):
 
 # Create movie
 def add_movie_controller(data):
+    movies_collection = get_movies_collection()
+
     if not data:
         return {'message': 'Missing data'}, 400
 
@@ -52,12 +56,15 @@ def add_movie_controller(data):
 
 # Get all movies
 def get_all_movies_controller():
+    movies_collection = get_movies_collection()
     movies = list(movies_collection.find())
     return [serialize_movie(movie) for movie in movies], 200
 
 
 # Get a movie by ID
 def get_movie_controller(movie_id, data=None):
+    movies_collection = get_movies_collection()
+
     if not ObjectId.is_valid(movie_id):
         return {'error': 'Invalid movie ID'}, 400
 
@@ -70,6 +77,8 @@ def get_movie_controller(movie_id, data=None):
 
 # Update a movie
 def update_movie_controller(movie_id, data):
+    movies_collection = get_movies_collection()
+
     if not ObjectId.is_valid(movie_id):
         return {'error': 'Invalid movie ID'}, 400
 
@@ -109,6 +118,9 @@ def update_movie_controller(movie_id, data):
 
 # Delete a movie
 def delete_movie_controller(movie_id):
+    movies_collection = get_movies_collection()
+    reviews_collection = get_reviews_collection()
+
     if not ObjectId.is_valid(movie_id):
         return {'error': 'Invalid movie ID'}, 400
 
@@ -122,10 +134,17 @@ def delete_movie_controller(movie_id):
 
 # Get top-rated movies
 def get_top_rated_movies_controller():
-    movies = list(movies_collection.find())
-    ranked_movies = []
+    movies_collection = get_movies_collection()
+    reviews_collection = get_reviews_collection()
 
-    for movie in movies:
+    try:
+        top_movies = list(movies_collection.find().sort("imdb.rating", -1).limit(10))
+
+    except Exception as e:
+        return {'error': str(e)}, 500
+
+    ranked_movies = []
+    for movie in top_movies:
         reviews = list(reviews_collection.find({'movie_id': movie['_id']}))
         if reviews:
             avg_rating = sum(float(review.get('rating', 0)) for review in reviews) / len(reviews)

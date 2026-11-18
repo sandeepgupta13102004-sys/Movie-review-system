@@ -1,10 +1,15 @@
 from datetime import datetime, timezone
+
 from bson import ObjectId
-from config import movies_collection, reviews_collection
+
+from config import get_movies_collection, get_reviews_collection
 
 
 # Add a review and comment
 def add_review_controller(movie_id, data):
+    movies_collection = get_movies_collection()
+    reviews_collection = get_reviews_collection()
+
     if not data:
         return {'message': 'Missing data'}, 400
 
@@ -51,6 +56,9 @@ def add_review_controller(movie_id, data):
 
 # Get all reviews for a particular movie
 def get_reviews_controller(movie_id):
+    movies_collection = get_movies_collection()
+    reviews_collection = get_reviews_collection()
+
     if not ObjectId.is_valid(movie_id):
         return {'message': 'Invalid movie ID'}, 400
 
