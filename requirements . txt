@@ -1,5 +1,0 @@
-Flask
-pymongo
-gunicorn
-Flask-Cors
-dnspython
